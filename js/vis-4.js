@@ -186,7 +186,3 @@ function loadData(error, data) {
     })
   }
 }
-change function name
-    })
-  }
-}
