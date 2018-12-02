@@ -82,7 +82,7 @@ Bar.prototype.wrangleData = function() {
 
   // sort data
   vis.displayData = vis.data.sort(function(a, b) {
-    return vis.filter === "ascending" ? a.amount_pop < b.amount_pop : a.amount_pop > b.amount_pop;
+    return vis.filter === "ascending" ? b.amount_pop - a.amount_pop : a.amount_pop - b.amount_pop;
   }).slice(0, 10);
 
   vis.updateVis();
@@ -90,8 +90,6 @@ Bar.prototype.wrangleData = function() {
 
 Bar.prototype.updateVis = function() {
     var vis = this;
-
-    console.log(vis.displayData)
 
     // update order of x domain
     vis.x.domain(vis.displayData.map(function(d) { return d.abbreviation; }));
@@ -185,6 +183,10 @@ function loadData(error, data) {
       // update filter value
       document.getElementById("dropdownMenuButton4").innerHTML = this.innerHTML;
       barGraph.updateFilter(this.dataset.key); // change function name
+    })
+  }
+}
+change function name
     })
   }
 }
