@@ -1,5 +1,5 @@
 /*
- * Timeline - Object constructor function
+ * Timeline - Object constructor function (Inspired bu a lab from CS 171 2018)
  * @param _parentElement 	-- the HTML element in which to draw the visualization
  * @param _data						-- the actual data: perDayData
  */
@@ -41,7 +41,6 @@ Timeline.prototype.initVis = function(){
         .attr("width", vis.width)
         .attr("height", vis.height);
 
-
     // Scales and axes
     vis.x = d3.scaleTime()
         .range([0, vis.width]);
@@ -69,8 +68,6 @@ Timeline.prototype.initVis = function(){
 
     };
 
-
-
     vis.svg.append("g")
         .attr("class", "x-axis axis")
         .attr("transform", "translate(0," + vis.height + ")");
@@ -83,7 +80,6 @@ Timeline.prototype.initVis = function(){
         .attr("x", -50)
         .attr("y", -8)
         .text("Total reported breaches per month");
-
 
     // Append a path for the area function, so that it is later behind the brush overlay
     vis.timePath = vis.svg.append("path")
@@ -98,7 +94,6 @@ Timeline.prototype.initVis = function(){
         .y0(vis.height)
         .y1(function(d) { return vis.y(d.value.value); });
 
-
     // Initialize brushing component
     vis.currentBrushRegion = null;
     vis.brush = d3.brushX()
@@ -112,8 +107,6 @@ Timeline.prototype.initVis = function(){
             // 3. Trigger the event 'selectionChanged' of our event handler
             $(vis.eventHandler).trigger("selectionChanged", vis.currentBrushRegion);
         });
-
-    // Append brush component here
 
     // Append brush
     vis.brushGroup = vis.svg.append("g")
@@ -192,10 +185,6 @@ Timeline.prototype.updateVis = function(){
     // 3. Trigger the event 'selectionChanged' of our event handler
     $(vis.eventHandler).trigger("selectionChanged", vis.currentBrushRegion);
 
-    // test to call event handler, doesn't work
-    // the_brush_region = [0,30]
-    // the_brush_region = the_brush_region.map(vis.x.invert);
-    // $(vis.eventHandler).trigger("selectionChanged", the_brush_region);
 
     // Call the area function and update the path
     // D3 uses each data point and passes it to the area function.
@@ -261,7 +250,6 @@ Timeline.prototype.updateVis = function(){
         });
 
 
-
     // Call axis functions with the new domain
     vis.svg.select(".x-axis").call(vis.customXAxis);
     vis.svg.select(".y-axis").call(vis.customYAxis);
@@ -270,7 +258,7 @@ Timeline.prototype.updateVis = function(){
 Timeline.prototype.onDropDownChange = function(){
     var vis = this;
 
-// Remove brush
+    // Remove brush
     vis.brushGroup.remove();
     // Append brush
     vis.brushGroup = vis.svg.append("g")

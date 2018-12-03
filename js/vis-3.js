@@ -15,14 +15,17 @@ ForceLayout = function(_parentElement, _data) {
 ForceLayout.prototype.initVis = function() {
   var vis = this;
 
+  // margin convention
   vis.margin = { top: 0, right: 50, bottom: 0, left: 50 };
 
+  // size settings
   vis.width = 425;
   vis.height = 450;
   vis.padding = 1.5; // separation between same-color circles
   vis.clusterPadding = 6; // separation between different-color circles
   vis.maxRadius = vis.height * 0.14;
 
+  // create svg
   vis.svg = d3.select(vis.parentElement)
     .append('svg')
     .attr('height', vis.height)
@@ -41,17 +44,21 @@ ForceLayout.prototype.initVis = function() {
     .attr("class", "tooltip")
     .style("opacity", 0);
 
+  // create color scale
   vis.z = d3.scaleOrdinal().range(colorbrewer["YlOrRd"][8].slice(3, 8));
 
+  // create set for categories
   vis.categorySet = new Set();
 
+  // organize data by app category
   Object.keys(vis.data).forEach(function(k) {
     vis.categorySet.add(vis.data[k]["appCategory"]);
   });
 
-  let counter = 1;
+  var counter = 1;
   vis.category = {};
 
+  // assign numeric ids to each category
   vis.categorySet.forEach(function(c) {
     vis.category[c] = counter;
     counter += 1;
@@ -101,21 +108,25 @@ ForceLayout.prototype.wrangleData = function() {
     vis.top[c] = [];
   });
 
+  // organize numeric data values by category
   Object.keys(vis.data).forEach(function(k) {
     vis.values[vis.data[k]["appCategory"]].push(vis.data[k][vis.filter]);
     vis.top[vis.data[k]["appCategory"]].push({ value: vis.data[k][vis.filter], app: k });
   });
 
+  // find top apps by numeric value
   Object.keys(vis.top).forEach(function(k) {
     vis.top[k].sort(function(a, b) {
       return b.value - a.value;
     });
 
+    // create HTML string for top apps
     vis.top[k] = vis.top[k].slice(0, 5).map(function(curr) {
       return `<span>${curr.app} (${curr.value})</span><br>`
     }).join("");
   });
 
+  // create tooltip for legend labels
   vis.divs.on("mouseover", function(d) {
     vis.div2.transition()
         .duration(200)
@@ -135,6 +146,7 @@ ForceLayout.prototype.wrangleData = function() {
 
   vis.averages = {};
 
+  // get averages for each category
   vis.categorySet.forEach(function(c) {
     vis.averages[c] = math.mean(vis.values[c]);
   });
@@ -147,17 +159,19 @@ ForceLayout.prototype.wrangleData = function() {
 ForceLayout.prototype.updateVis = function() {
   var vis = this;
 
-  let n = Object.keys(vis.data).length; // total number of nodes
-  let m = vis.categorySet.length; // number of distinct clusters
-  let clusters = new Array(m);
+  var n = Object.keys(vis.data).length; // total number of nodes
+  var m = vis.categorySet.length; // number of distinct clusters
+  var clusters = new Array(m);
 
-  let radiusScale = d3.scaleLinear()
+  // radius scale for nodes
+  var radiusScale = d3.scaleLinear()
     .domain(d3.extent(Object.keys(vis.data), (k) => { return +vis.data[k][vis.filter]} ))
     .range([4, vis.maxRadius]);
 
-  let nodes = Object.keys(vis.data).map((k) => {
+  // create node objects with size and data
+  var nodes = Object.keys(vis.data).map((k) => {
     // scale radius to fit on the screen
-    let scaledRadius  = radiusScale(+vis.data[k][vis.filter]),
+    var scaledRadius  = radiusScale(+vis.data[k][vis.filter]),
         forcedCluster = vis.category[vis.data[k]["appCategory"]];
 
     // add cluster id and radius to array
@@ -174,14 +188,14 @@ ForceLayout.prototype.updateVis = function() {
     return d;
   });
 
-  // append the circles to svg then style
-  // add functions for interaction
-  let circles = vis.g
+  // select all circles
+  var circles = vis.g
       .datum(nodes)
     .selectAll('.circle-node')
       .data(d => d);
 
-  let circlesMerge = circles
+  // merge circles and call drag functions
+  var circlesMerge = circles
     .enter()
     .append('circle')
       .attr('class', 'circle-node')
@@ -194,12 +208,14 @@ ForceLayout.prototype.updateVis = function() {
       .on("drag", dragged)
       .on("end", dragended));
 
-  let text = vis.g
+  // select all text
+  var text = vis.g
       .datum(nodes)
     .selectAll('.text-node')
       .data(d => d);
 
-  let textMerge = text
+  // merge text and call drag functions
+  var textMerge = text
     .enter().append('text')
       .attr("class", "text-node")
       .attr("dy", ".3em")
@@ -221,25 +237,7 @@ ForceLayout.prototype.updateVis = function() {
       .on("drag", dragged)
       .on("end", dragended));
 
-  textMerge
-    // add tooltips to text
-    .on("mouseover", function(d) {
-          vis.div.transition()
-              .duration(200)
-              .style("opacity", .9);
-          vis.div.html(`App: <span style='color:#FFDB6D'>${d.app}</span><br><br>
-                     Category: <span style='color:#FFDB6D'>${d.appCategory}</span><br><br>
-                     ${vis.filter !== 'connections' ? 'Third-Party ' : ''}Connections: <span style='color:#FFDB6D'>${d.connections}</span><br>
-                    `)
-              .style("left", (d3.event.pageX + 50) + "px")
-              .style("top", (d3.event.pageY - 50) + "px");
-          })
-      .on("mouseout", function(d) {
-        vis.div.transition()
-          .duration(500)
-          .style("opacity", 0);
-      });
-
+  // create tooltips for circles
   circlesMerge
     // add tooltips to each circle
     .on("mouseover", function(d) {
@@ -259,6 +257,27 @@ ForceLayout.prototype.updateVis = function() {
         .style("opacity", 0);
     });
 
+  // create tooltips for text
+  textMerge
+    // add tooltips to text
+    .on("mouseover", function(d) {
+          vis.div.transition()
+              .duration(200)
+              .style("opacity", .9);
+          vis.div.html(`App: <span style='color:#FFDB6D'>${d.app}</span><br><br>
+                     Category: <span style='color:#FFDB6D'>${d.appCategory}</span><br><br>
+                     ${vis.filter !== 'connections' ? 'Third-Party ' : ''}Connections: <span style='color:#FFDB6D'>${d.connections}</span><br>
+                    `)
+              .style("left", (d3.event.pageX + 50) + "px")
+              .style("top", (d3.event.pageY - 50) + "px");
+          })
+      .on("mouseout", function(d) {
+        vis.div.transition()
+          .duration(500)
+          .style("opacity", 0);
+      });
+
+  // create transitions for circle size and color
   circlesMerge
     .transition()
     .duration(1000)
@@ -278,6 +297,7 @@ ForceLayout.prototype.updateVis = function() {
 
   var format = d3.format(",d");
 
+  // create average text and transitions between numbers
   averageText
     .enter().append("h1")
       .attr("class", "average")
@@ -300,7 +320,7 @@ ForceLayout.prototype.updateVis = function() {
     });
 
   // create the clustering/collision force simulation
-  let simulation = d3.forceSimulation(nodes)
+  var simulation = d3.forceSimulation(nodes)
     .velocityDecay(0.1)
     .force("x", d3.forceX().strength(.0005))
     .force("y", d3.forceY().strength(.0005))
@@ -336,7 +356,7 @@ ForceLayout.prototype.updateVis = function() {
     d.fy = null;
   }
 
-  // These are implementations of the custom forces.
+  // implementations of custom forces
   function clustering(alpha) {
       nodes.forEach(function(d) {
         var cluster = clusters[d.cluster];
@@ -398,12 +418,13 @@ ForceLayout.prototype.updateFilter = function(filter) {
 
 // adapted from https://bl.ocks.org/Thanaporn-sk/c7f74cb5051a0cdf6cf077a9db332dfb
 function loadData(error, ios, android) {
-  let data = {};
+  var data = {};
 
   function processRow(type) {
     return function(datum) {
-      let app = `${datum["App"]} (${type})`;
+      var app = `${datum["App"]} (${type})`;
 
+      // filter out categories not related to medical and health apps
       if (["Photo & Video",
            "Navigation",
            "Business",
@@ -423,8 +444,9 @@ function loadData(error, ios, android) {
         };
       }
 
-      let category = datum["Category"];
+      var category = datum["Category"];
 
+      // organize by category of connection
       if (category) {
         if (!(category in data[app]["categories"])) {
           data[app]["categories"][category] = 0;
@@ -433,22 +455,27 @@ function loadData(error, ios, android) {
         data[app]["categories"][category] += 1;
       }
 
+      // add domain to set for app
       data[app]["connections"].add(`${datum["Category"]}-${datum["App_HOST"]}`);
 
+      // add third-party domain to set if applicable
       if (datum["Third_party"]) {
         data[app]["thirdPartyConnections"].add(`${datum["Category"]}-${datum["App_HOST"]}`);
       }
     };
   }
 
+  // process both iOS and android apps
   ios.forEach(processRow("iOS"));
   android.forEach(processRow("Android"));
 
+  // count total number of connections and third-party connections
   Object.keys(data).forEach(function(key) {
     data[key]["connections"] = data[key]["connections"].size;
     data[key]["thirdPartyConnections"] = data[key]["thirdPartyConnections"].size;
   });
 
+  // initialize force layout
   var forceLayout = new ForceLayout("#vis-3-area", data);
 
   // add listener for changes to Bootstrap dropdown

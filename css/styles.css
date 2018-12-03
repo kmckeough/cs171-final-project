@@ -69,6 +69,14 @@ p {
   background-image: linear-gradient( rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.6) ), url('../img/data2.jpg');
 }
 
+#call-to-action {
+  margin-top: 100px;
+}
+
+#action-container {
+  margin-top: 10px;
+}
+
 .typedHeader {
   display: inline-block;
 }
@@ -87,10 +95,36 @@ img {
   margin: 0 auto;
 }
 
+#screencast-container {
+  margin-top: 0px;
+  display: block;
+}
+
+#screencast-title {
+  margin-bottom: 20px;
+}
+
+.footer-title {
+  margin-bottom: 30px;
+}
+
+#inspiration-title {
+  margin-top: 25px;
+  display: block;
+}
 /* scroll dots */
 #fp-nav ul li .fp-tooltip {
   color: #000000;
 }
+
+#action-container a {
+  color: rgb(253, 141, 60);
+}
+
+#author-list {
+  list-style-type: none;
+}
+
 
 /* icons and buttons */
 .icons-container {

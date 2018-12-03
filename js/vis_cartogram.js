@@ -17,7 +17,7 @@ queue()
     .await(loadData);
 
 function loadData(error,countDate,breachData,highlightData) {
-    console.log(error);
+    // console.log(error);
 
     // Format Timeline Data
     timelineData = countDate.map(function (d) {
@@ -58,12 +58,12 @@ function createVis() {
 
     var dropMenu = new DropDown("dropdown-menu2", allData,MyEventHandler);
 
-    // Bind event handler
+    // Bind event handler for timeline selection
     $(MyEventHandler).bind("selectionChanged", function(event, rangeStart, rangeEnd){
-        console.log(rangeStart, rangeEnd)
         map.onSelectionChange(rangeStart, rangeEnd);
     });
 
+    // Bind event handler for dropdwon menu
     $(MyEventHandler).bind("dropdownChange",function(event, selection){
         map.onDropDownChange(selection);
         timeline.onDropDownChange();
